@@ -1,156 +1,85 @@
 /* eslint-disable function-paren-newline */
 <template>
-    <div class="content">
-        <button class="add-to-card" @click="addToCard">Add to card</button>
-        <div class="top-row">
-            <div class="top part">
-                <div class="robot-name">
+  <div class="content">
+    <PreviewRobotBuilder :selectedRobot="selectedRobot" @addToCard="addToCard"/>
+    <div class="top-row">
+      <!-- <div class="robot-name">
                   {{selectedRobot.head.title}}
                   <span v-if="selectedRobot.head.onSale" class="sale">Sale!</span>
-                </div>
-                <img v-bind:src="selectedRobot.head.src" title="head"/>
-                <button v-on:click="selectPreviousHead" class="prev-selector">&#9668;</button>
-                <button v-on:click="selectNextHead" class="next-selector">&#9658;</button>
-            </div>
-            </div>
-            <div class="middle-row">
-            <div class="left part">
-                <img v-bind:src="selectedRobot.leftArm.src" title="left arm"/>
-                <button @click="selectPreviousLeftArm" class="prev-selector">&#9650;</button>
-                <button @click="selectNextLeftArm" class="next-selector">&#9660;</button>
-            </div>
-            <div class="center part">
-                <img v-bind:src="selectedRobot.torso.src" title="torsos"/>
-                <button @click="selectPreviousTorso" class="prev-selector">&#9668;</button>
-                <button @click="selectNextTorso" class="next-selector">&#9658;</button>
-            </div>
-            <div class="right part">
-                <img :src="selectedRobot.rightArm.src" title="right arm"/>
-                <button v-on:click="selectPreviousRightArm" class="prev-selector">&#9650;</button>
-                <button v-on:click="selectNextRightArm" class="next-selector">&#9660;</button>
-            </div>
-            </div>
-            <div class="bottom-row">
-            <div class="bottom part">
-                <img :src="selectedRobot.base.src" title="base"/>
-                <button @click="selectPreviousBase" class="prev-selector">&#9668;</button>
-                <button @click="selectNextBase" class="next-selector">&#9658;</button>
-            </div>
-        </div>
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Robot</th>
-                <th class="cost">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(robot, index) in cart" :key="index">
-                <td>
-                  {{robot.head.title}}
-                </td>
-                <td class="cost">
-                  {{robot.cost}}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      </div>-->
+      <PartSelector :parts="availableParts.heads" position="top"
+      @selectedPart="part => selectedRobot.head = part" />
+    </div>
+    <div class="middle-row">
+      <PartSelector :parts="availableParts.arms" position="left"
+      @selectedPart="part => selectedRobot.leftArm = part" />
+      <PartSelector :parts="availableParts.torsos" position="center"
+      @selectedPart="part => selectedRobot.torso = part" />
+      <PartSelector :parts="availableParts.arms" position="right"
+      @selectedPart="part => selectedRobot.rightArm = part" />
+    </div>
+    <div class="bottom-row">
+      <PartSelector :parts="availableParts.bases" position="bottom"
+      @selectedPart="part => selectedRobot.base = part" />
+    </div>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>Robot</th>
+            <th class="cost">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(robot, index) in cart" :key="index">
+            <td>{{robot.head.title}}</td>
+            <td class="cost">{{robot.cost}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script>
 import availableParts from '../data/parts';
+import PartSelector from './PartSelector.vue';
+import PreviewRobotBuilder from './PreviewRobotBuilder.vue';
 
-function getPreviousValidIndex(index, length) {
-  const previousIndex = index - 1;
-  return previousIndex < 0 ? length - 1 : previousIndex;
-}
-
-function getNextValidIndex(index, length) {
-  const nextIndex = index + 1;
-  return nextIndex > length - 1 ? 0 : nextIndex;
-}
 export default {
   name: 'RobotBuilder',
+  components: { PartSelector, PreviewRobotBuilder },
   data() {
     return {
       availableParts,
       cart: [],
-      selectedHeadIndex: 0,
-      selectedLeftArmIndex: 0,
-      selectedRightArmIndex: 0,
-      selectedTorsoIndex: 0,
-      selectedBaseIndex: 0,
+      selectedRobot: {
+        head: {},
+        leftArm: {},
+        rightArm: {},
+        torso: {},
+        base: {},
+      },
     };
   },
   computed: {
-    selectedRobot() {
-      return {
-        head: this.availableParts.heads[this.selectedHeadIndex],
-        leftArm: this.availableParts.arms[this.selectedLeftArmIndex],
-        rightArm: this.availableParts.arms[this.selectedRightArmIndex],
-        torso: this.availableParts.torsos[this.selectedTorsoIndex],
-        base: this.availableParts.bases[this.selectedBaseIndex],
-      };
+    headBorderStyle() {
+      return this.selectedRobot.head.onSale
+        ? 'border: 1px solid red'
+        : 'border: 1px solid gray';
+    },
+    saleBorderClass() {
+      return this.selectedRobot.head.onSale ? 'sale-class' : '';
     },
   },
   methods: {
-    selectNextHead() {
-      this.selectedHeadIndex = getNextValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedHeadIndex, availableParts.heads.length);
-    },
-    selectPreviousHead() {
-      this.selectedHeadIndex = getPreviousValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedHeadIndex, availableParts.heads.length);
-    },
-    selectNextLeftArm() {
-      this.selectedLeftArmIndex = getNextValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedLeftArmIndex, availableParts.arms.length);
-    },
-    selectPreviousLeftArm() {
-      this.selectedLeftArmIndex = getPreviousValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedLeftArmIndex, availableParts.arms.length);
-    },
-    selectNextRightArm() {
-      this.selectedRightArmIndex = getNextValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedRightArmIndex, availableParts.arms.length);
-    },
-    selectPreviousRightArm() {
-      this.selectedRightArmIndex = getPreviousValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedRightArmIndex, availableParts.arms.length);
-    },
-    selectNextTorso() {
-      this.selectedTorsoIndex = getNextValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedTorsoIndex, availableParts.torsos.length);
-    },
-    selectPreviousTorso() {
-      this.selectedTorsoIndex = getPreviousValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedTorsoIndex, availableParts.torsos.length);
-    },
-    selectNextBase() {
-      this.selectedBaseIndex = getNextValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedBaseIndex, availableParts.bases.length);
-    },
-    selectPreviousBase() {
-      this.selectedBaseIndex = getPreviousValidIndex(
-        // eslint-disable-next-line function-paren-newline
-        this.selectedBaseIndex, availableParts.bases.length);
-    },
     addToCard() {
       const robot = this.selectedRobot;
-      const cost = robot.head.cost + robot.leftArm.cost + robot.torso.cost
-                    + robot.rightArm.cost + robot.base.cost;
+      const cost = robot.head.cost
+        + robot.leftArm.cost
+        + robot.torso.cost
+        + robot.rightArm.cost
+        + robot.base.cost;
       this.cart.push(Object.assign({}, robot, { cost }));
     },
   },
@@ -160,23 +89,23 @@ export default {
 <style>
 .part {
   position: relative;
-  width:165px;
-  height:165px;
+  width: 165px;
+  height: 165px;
   border: 3px solid #aaa;
 }
 .part img {
-  width:165px;
+  width: 165px;
 }
 .top-row {
-  display:flex;
+  display: flex;
   justify-content: space-around;
 }
 .middle-row {
-  display:flex;
+  display: flex;
   justify-content: center;
 }
 .bottom-row {
-  display:flex;
+  display: flex;
   justify-content: space-around;
   border-top: none;
 }
@@ -200,7 +129,7 @@ export default {
 }
 .prev-selector {
   position: absolute;
-  z-index:1;
+  z-index: 1;
   top: -3px;
   left: -28px;
   width: 25px;
@@ -208,14 +137,15 @@ export default {
 }
 .next-selector {
   position: absolute;
-  z-index:1;
+  z-index: 1;
   top: -3px;
   right: -28px;
   width: 25px;
   height: 171px;
 }
-.center .prev-selector, .center .next-selector {
-  opacity:0.8;
+.center .prev-selector,
+.center .next-selector {
+  opacity: 0.8;
 }
 .left .prev-selector {
   top: -28px;
@@ -258,19 +188,16 @@ export default {
 .content {
   position: relative;
 }
-.add-to-card {
-  position: absolute;
-  right: 30px;
-  width: 220px;
-  padding: 3px;
-  font-size: 16px;
-}
-th, td {
+th,
+td {
   text-align: left;
   padding: 5px;
   padding-right: 20px;
 }
 .cost {
   text-align: right;
+}
+.sale-class {
+  border: 3px solid red;
 }
 </style>
