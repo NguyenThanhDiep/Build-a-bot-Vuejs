@@ -1,6 +1,6 @@
 <template>
   <div class="part" :class="position">
-    <img :src="selectedPart.src" title="arm"/>
+    <img @click="showPartInfo()" :src="selectedPart.src" :title="selectedPart.title"/>
     <button @click="selectPreviousPart()" class="prev-selector"></button>
     <button @click="selectNextPart()" class="next-selector"></button>
     <span :style="position === 'left' ? 'left: 5px; right: 110px;' : ''"
@@ -65,7 +65,15 @@ export default {
       );
       // this.emitSelectedPart();
     },
-
+    showPartInfo() {
+      this.$router.push({
+        name: 'Parts',
+        params: {
+          partType: this.selectedPart.type,
+          id: this.selectedPart.id,
+        },
+      });
+    },
   },
 };
 
@@ -97,6 +105,7 @@ export default {
 }
 .part img {
   width:165px;
+  cursor: pointer;
 }
 .top {
   border-bottom: none;

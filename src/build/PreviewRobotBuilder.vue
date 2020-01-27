@@ -26,7 +26,6 @@ export default {
   components: { CollapsibleSection },
   props: {
     selectedRobot: {
-      type: Array,
       required: true,
     },
   },
