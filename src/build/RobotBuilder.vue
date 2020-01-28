@@ -34,7 +34,7 @@ export default {
   name: 'RobotBuilder',
   components: { PartSelector, PreviewRobotBuilder },
   created() {
-    this.$store.dispatch('getParts');
+    this.$store.dispatch('robots/getParts');
   },
   data() {
     return {
@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     availablePartsAPI() {
-      return this.$store.state.parts;
+      return this.$store.state.robots.parts;
     },
     headBorderStyle() {
       return this.selectedRobot.head.onSale
@@ -70,7 +70,8 @@ export default {
         + robot.torso.cost
         + robot.rightArm.cost
         + robot.base.cost;
-      this.$store.commit('addRobotToCart', Object.assign({}, robot, { cost }));
+      this.$store.dispatch('robots/addRobotToCart', Object.assign({}, robot, { cost }))
+        .then(() => this.$router.push('/cart'));
       // this.cart.push(Object.assign({}, robot, { cost }));
     },
   },
