@@ -1,42 +1,26 @@
 /* eslint-disable function-paren-newline */
 <template>
-  <div class="content">
+  <div class="content" v-if="availablePartsAPI">
     <PreviewRobotBuilder :selectedRobot="selectedRobot" @addToCard="addToCard"/>
     <div class="top-row">
       <!-- <div class="robot-name">
                   {{selectedRobot.head.title}}
                   <span v-if="selectedRobot.head.onSale" class="sale">Sale!</span>
       </div>-->
-      <PartSelector :parts="availableParts.heads" position="top"
+      <PartSelector :parts="availablePartsAPI.heads" position="top"
       @selectedPart="part => selectedRobot.head = part" />
     </div>
     <div class="middle-row">
-      <PartSelector :parts="availableParts.arms" position="left"
+      <PartSelector :parts="availablePartsAPI.arms" position="left"
       @selectedPart="part => selectedRobot.leftArm = part" />
-      <PartSelector :parts="availableParts.torsos" position="center"
+      <PartSelector :parts="availablePartsAPI.torsos" position="center"
       @selectedPart="part => selectedRobot.torso = part" />
-      <PartSelector :parts="availableParts.arms" position="right"
+      <PartSelector :parts="availablePartsAPI.arms" position="right"
       @selectedPart="part => selectedRobot.rightArm = part" />
     </div>
     <div class="bottom-row">
-      <PartSelector :parts="availableParts.bases" position="bottom"
+      <PartSelector :parts="availablePartsAPI.bases" position="bottom"
       @selectedPart="part => selectedRobot.base = part" />
-    </div>
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Robot</th>
-            <th class="cost">Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(robot, index) in cart" :key="index">
-            <td>{{robot.head.title}}</td>
-            <td class="cost">{{robot.cost}}</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </template>
@@ -49,6 +33,9 @@ import PreviewRobotBuilder from './PreviewRobotBuilder.vue';
 export default {
   name: 'RobotBuilder',
   components: { PartSelector, PreviewRobotBuilder },
+  created() {
+    this.$store.dispatch('getParts');
+  },
   data() {
     return {
       availableParts,
@@ -63,6 +50,9 @@ export default {
     };
   },
   computed: {
+    availablePartsAPI() {
+      return this.$store.state.parts;
+    },
     headBorderStyle() {
       return this.selectedRobot.head.onSale
         ? 'border: 1px solid red'
@@ -80,7 +70,8 @@ export default {
         + robot.torso.cost
         + robot.rightArm.cost
         + robot.base.cost;
-      this.cart.push(Object.assign({}, robot, { cost }));
+      this.$store.commit('addRobotToCart', Object.assign({}, robot, { cost }));
+      // this.cart.push(Object.assign({}, robot, { cost }));
     },
   },
 };
@@ -187,15 +178,6 @@ export default {
 }
 .content {
   position: relative;
-}
-th,
-td {
-  text-align: left;
-  padding: 5px;
-  padding-right: 20px;
-}
-.cost {
-  text-align: right;
 }
 .sale-class {
   border: 3px solid red;
